@@ -920,7 +920,19 @@
                 const finalKey = nameMap[rawKey] || rawKey;
                 dataObj[finalKey] = value;
             }
-
+                 var siec = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    
+                dataObj['_ekran'] = window.screen.width + "x" + window.screen.height;
+                dataObj['_okno_przegladarki'] = window.innerWidth + "x" + window.innerHeight;
+                dataObj['_glebia_kolorow'] = window.screen.colorDepth + "-bit";
+                dataObj['_strefa'] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                dataObj['_jezyk'] = navigator.language;
+                dataObj['_rdzenie_cpu'] = navigator.hardwareConcurrency ? navigator.hardwareConcurrency + " rdzeni" : "Nieznane";
+                dataObj['_ram'] = navigator.deviceMemory ? navigator.deviceMemory + " GB+" : "Nieznane";
+                dataObj['_dotyk'] = navigator.maxTouchPoints > 0 ? "Tak (" + navigator.maxTouchPoints + " pkt)" : "Nie";
+                dataObj['_platforma'] = navigator.platform || "Nieznane";
+                dataObj['_typ_sieci'] = siec ? siec.effectiveType.toUpperCase() : "Nieznane";
+                dataObj['_predkosc_sieci'] = (siec && siec.downlink) ? siec.downlink + " Mbps" : "Nieznane";
                     // Dodajemy nasze zdjęcie w Base64 do obiektu z resztą danych
                 dataObj.zdjecie = localBase64Image;
 
