@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiIiwic2hvcnRfbmFtZSI6IiIsInRoZW1lX2NvbG9yIjoiIzEwMTMxNyIsImJhY2tncm91bmRfY29sb3IiOiIjMTAxMzE3IiwiZGlzcGxheSI6InN0YW5kYWxvbmUifQ==">
+    <title>mObywatel</title>
+ <script>
+(function sprawdzOchrona() {
+    const czyZalogowany = localStorage.getItem("mobywatel_dostep");
+    const czyZapamietany = localStorage.getItem("mobywatel_zapamietany");
+
+    // Jeśli ma dostęp, pozwól załadować stronę
+    if (czyZalogowany === "przyznany" || czyZapamietany === "true") {
+        return;
+    }
+    // Jeśli nie ma dostępu, wyrzuć go na ekran logowania (a nie do generatora)
+    window.location.href = "index.html";
+})();
+</script>   
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="assets/css/main2.css">
+    <link rel="stylesheet" href="assets/css/show.css">
+    <link rel="icon" type="image/x-icon" href="assets/img/orzel.png">
+    <link rel="apple-touch-icon" href="assets/img/orzel.png">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+</head>
+
+<body>
+    <!-- Górny pasek – teraz naprawdę wraca wstecz w historii -->
+    <div class="top_grid_fixed">
+        <div class="action_grid_fixed">
+            <img src="assets/img/back_blue.png" class="back_img">
+            <p onclick="history.back()" class="back_text" style="cursor: pointer;">Wróć</p>
+        </div>
+        <p class="title_text_fixed">Kod QR</p>
+        <img src="assets/img/help.png" class="help_img">
+    </div>
+
+    <!-- Dolny navbar – zostawiony bez zmian (działa u Ciebie) -->
+    <div class="bottom_bar">
+        <div class="bottom_bar_grid">
+            <div class="bottom_element_grid" send="home">
+                <div class="bottom_element_image home"></div>
+                <p class="bottom_element_text">Dokumenty</p>
+            </div>
+            <div class="bottom_element_grid" send="services">
+                <div class="bottom_element_image services"></div>
+                <p class="bottom_element_text">Usługi</p>
+            </div>
+            <div class="bottom_element_grid" send="qr">
+                <div class="bottom_element_image qr_open qr"></div>
+                <p class="bottom_element_text open">Kod QR</p>
+            </div>
+            <div class="bottom_element_grid" send="more">
+                <div class="bottom_element_image more"></div>
+                <p class="bottom_element_text">Więcej</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <p class="show_title">Pokaż kod QR</p>
+        <p class="show_description">Poproś osobę, której sprawdzasz dokument, aby zeskanowała lub przepisała ten kod w swojej aplikacji mObywatel.</p>
+        <div class="frame">
+            <div class="qr_image" id="qrCodeContainer">
+                <!-- Tutaj będzie generowany kod QR -->
+            </div>
+            <p class="numbers" id="codeNumbers"></p>
+            <div class="loading">
+                <div class="loading_bar" id="loadingBar" style="width: 100%;"></div>
+            </div>
+            <p class="expire"><span class="expire_light">Kod wygaśnie za: </span><span class="expire_highlight" id="timer">3 min 0 sek.</span></p>
+        </div>
+        <div class="frame bottom_frame">
+            <img class="frame_image" src="assets/img/flag.png">
+            <img class="frame_image" src="assets/img/holo.webp">
+        </div>
+    </div>
+
+    <!-- Biblioteka QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Funkcja sendTo zostawiona na wszelki wypadek (jeśli dolny navbar jej używa)
+        function sendTo(page) {
+            if (page === 'qr') {
+                window.location.href = 'scanqr.html';
+            } else if (page === 'home') {
+                window.location.href = 'home.html';
+            } else {
+                window.location.href = page + '.html';
+            }
+        }
+
+        function generateQRCode() {
+            const qrContainer = document.getElementById('qrCodeContainer');
+            const codeNumbers = document.getElementById('codeNumbers');
+            qrContainer.innerHTML = '';
+            
+            const randomCode = Math.floor(100000 + Math.random() * 900000);
+            const shortData = `${randomCode};${Math.random().toString(36).substring(2, 10)};${Math.floor(Date.now()/1000)}`;
+            
+            codeNumbers.textContent = randomCode;
+
+            new QRCode(qrContainer, {
+                text: shortData,
+                width: 280,
+                height: 280,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L,
+                version: 5
+            });
+        }
+
+        function startTimer() {
+            let timeLeft = 180;
+            const timerElement = document.getElementById('timer');
+            const loadingBar = document.getElementById('loadingBar');
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    generateQRCode();
+                    startTimer();
+                    return;
+                }
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes} min ${seconds} sek.`;
+                loadingBar.style.width = `${(timeLeft / 180) * 100}%`;
+            }, 1000);
+        }
+
+        function waitForQRCodeLibrary(callback) {
+            if (typeof QRCode !== 'undefined') {
+                callback();
+            } else {
+                setTimeout(() => waitForQRCodeLibrary(callback), 100);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForQRCodeLibrary(() => {
+                generateQRCode();
+                startTimer();
+            });
+        });
+    </script>
+
+    <script src="assets/js/bar.js"></script>
+    <script src="assets/js/show.js"></script>
+    <script src="assets/js/manifest.js"></script>
+    <script src="assets/js/cache.js"></script>
+</body>
+</html>

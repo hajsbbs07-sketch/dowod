@@ -1,0 +1,949 @@
+<html lang="pl"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mObywatel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {
+            --bg-dark: #09020e; 
+            --bg-mid: #1c0a27; 
+            --text-light: #eeeeee;
+            --text-subtle: #777777;
+            --glass-fill: rgba(255, 255, 255, 0.05); 
+            --border-clear: rgba(150, 0, 255, 0.3); 
+            --accent-purple: #9c27b0; 
+            --accent-glow: rgba(150, 0, 255, 0.6);
+            --shadow-button: rgba(150, 0, 255, 0.4);
+            --error-red: #ff3333; 
+            --success-green: #33ff33; 
+            --accent-blue: #3366ff; 
+            --accent-green: #27b06c; 
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+            background-image: radial-gradient(circle at top left, var(--bg-mid) 5%, transparent 40%),
+                                 radial-gradient(circle at bottom right, rgba(150, 0, 255, 0.1) 0%, transparent 45%);
+            margin-top: 5vh; 
+        }
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .login-card {
+            background: var(--glass-fill);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px 30px;
+            border-radius: 28px;
+            border: 1px solid var(--border-clear);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px var(--accent-glow) inset;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+        .login-card h2 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            color: var(--text-light);
+            text-shadow: 0 0 10px var(--accent-purple);
+        }
+        .login-card input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-clear);
+            border-radius: 12px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .login-card input[type="password"]:focus {
+            border-color: var(--accent-purple);
+            outline: none;
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--accent-purple);
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--shadow-button);
+            transition: all 0.2s ease;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+        .login-error {
+            color: var(--error-red);
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+        }
+        .container {
+            /* Głęboki Frosted Glass Effect */
+            background: var(--glass-fill);
+            backdrop-filter: blur(20px) brightness(1.1);
+            -webkit-backdrop-filter: blur(20px) brightness(1.1);
+            padding: 30px; 
+            border-radius: 28px; 
+            border: 1px solid var(--border-clear);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px var(--accent-glow) inset;
+            width: 100%;
+            max-width: 350px; 
+            margin-bottom: 20px; 
+        }
+        h1 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px var(--accent-purple);
+            border-bottom: 1px solid var(--border-clear);
+            padding-bottom: 18px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            transition: transform 0.2s ease-out;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-subtle);
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+        .form-group:focus-within {
+            transform: translateY(-2px);
+            background-color: rgba(150, 0, 255, 0.05);
+            border-radius: 12px;
+        }
+        .form-group:focus-within label {
+            color: var(--accent-purple);
+            text-shadow: 0 0 8px var(--accent-purple);
+        }
+        input[type="text"], input[type="date"], select {
+            width: 100%;
+            padding: 16px 14px;
+            border: 1px solid var(--border-clear);
+            border-radius: 12px;
+            box-sizing: border-box;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-light);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 1rem;
+            -webkit-appearance: none;
+            appearance: none; 
+        }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            border-color: var(--accent-purple);
+            outline: none;
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background-color: var(--bg-mid);
+        }
+        ::placeholder {
+            color: var(--text-subtle);
+            opacity: 0.8; 
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+        .autofill-block {
+            margin-top: -10px; 
+            margin-bottom: 20px; 
+            padding: 15px;
+            border-radius: 12px;
+            background-color: rgba(51, 102, 255, 0.05);
+            border: 1px solid rgba(51, 102, 255, 0.2);
+            box-shadow: 0 0 10px rgba(51, 102, 255, 0.1);
+        }
+        #autofillButton {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-top: 0;
+            background-color: var(--accent-blue);
+            color: var(--text-light);
+            box-shadow: 0 2px 10px rgba(51, 102, 255, 0.4);
+        }
+        #autofillButton:hover:not([disabled]) {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+            box-shadow: 0 4px 15px rgba(51, 102, 255, 0.6);
+        }
+        #statusMessageAutofill {
+            text-align: center;
+            margin-top: 10px;
+            min-height: 18px; 
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-subtle);
+        }
+        .autofill-all-block {
+            margin-top: 10px; 
+            margin-bottom: 20px; 
+            padding: 15px;
+            border-radius: 12px;
+            background-color: rgba(39, 176, 108, 0.05);
+            border: 1px solid rgba(39, 176, 108, 0.2);
+            box-shadow: 0 0 10px rgba(39, 176, 108, 0.1);
+        }
+        #autofillAllButton {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-top: 0; 
+            background-color: var(--accent-green);
+            color: var(--text-light);
+            box-shadow: 0 2px 10px rgba(39, 176, 108, 0.4);
+        }
+        #autofillAllButton:hover:not([disabled]) {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+            box-shadow: 0 4px 15px rgba(39, 176, 108, 0.6);
+        }
+        #statusMessageAutofillAll {
+            text-align: center;
+            margin-top: 10px;
+            min-height: 18px; 
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-subtle);
+        }
+        #generateButton {
+            width: 100%;
+            padding: 18px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            margin-bottom: 25px; 
+            background-color: var(--accent-purple);
+            color: var(--text-light);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px var(--shadow-button);
+            position: relative;
+            overflow: hidden;
+        }
+        #generateButton:hover:not([disabled]) {
+            transform: translateY(-3px);
+            filter: brightness(1.2);
+            box-shadow: 0 8px 30px var(--shadow-button), 
+                       0 0 0 2px rgba(255, 255, 255, 0.1),
+                       0 0 25px var(--accent-glow);
+            background: linear-gradient(135deg, var(--accent-purple), #b339d6);
+        }
+        #generateButton:active:not([disabled]) {
+            transform: translateY(-1px);
+            transition: all 0.1s ease;
+        }
+        #generateButton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.8s ease;
+        }
+        #generateButton:hover::before {
+            left: 100%;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .divider {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-clear);
+            margin: 30px 0;
+        }
+        .footer-dev {
+            text-align: center;
+            padding-top: 5px; 
+            font-size: 0.75rem;
+            color: var(--text-subtle);
+            letter-spacing: 0.5px;
+            position: relative; 
+            width: 100%;
+        }
+        .footer-dev span {
+            display: block;
+            color: var(--text-light); 
+            font-weight: 800; 
+            font-size: 1.5rem; 
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 
+                         0 0 20px var(--accent-purple); 
+            margin-top: 5px;
+        }
+        #statusMessage {
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            min-height: 18px; 
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .file-upload-wrapper { position: relative; display: block; }
+        #fileInput { opacity: 0; position: absolute; z-index: -1; width: 0.1px; height: 0.1px; overflow: hidden; }
+        .custom-file-upload { 
+            display: block; width: 100%; padding: 16px 14px; border: 1px solid var(--border-clear); border-radius: 12px; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.5); color: var(--text-subtle); cursor: pointer; text-align: center; transition: all 0.3s; font-size: 1rem; font-weight: 500;
+        }
+        .custom-file-upload:hover { border-color: var(--accent-purple); box-shadow: 0 0 0 4px rgba(150, 0, 255, 0.2); }
+        .image-preview-container { width: 100%; height: 0; opacity: 0; border: 1px dashed transparent; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-top: 0; cursor: pointer; transition: all 0.3s ease-in-out; }
+        .image-preview-container.active { height: 120px; opacity: 1; margin-top: 5px; border: 1px dashed var(--border-clear); }
+        #imagePreview { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; display: block; }
+        #imagePreviewContainer.active:hover { border-color: var(--accent-purple); }
+        .instruction-details {
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+        }
+        .instruction-details summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            list-style: none;
+            background-color: var(--accent-purple);
+            color: var(--text-light);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .instruction-details summary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--accent-glow), 0 0 5px var(--text-light);
+        }
+        .instruction-details[open] summary {
+            background-color: #6a1b9a;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            box-shadow: 0 0 5px var(--accent-glow);
+        }
+        .instruction-details .icon {
+            font-size: 1.2rem;
+            margin-left: 10px;
+            transition: transform 0.2s ease;
+        }
+        .instruction-details[open] .icon {
+            transform: rotate(90deg);
+        }
+        .instruction-content {
+            padding: 20px;
+            background-color: var(--bg-mid);
+            border: 1px solid var(--border-clear);
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .instruction-content p, .instruction-content strong, .instruction-content li {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .instruction-content ol {
+            margin-top: 5px;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .kot-wrap {
+            position: relative;
+            width: fit-content;
+            margin: 0 auto 20px auto;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .kot-mini {
+            display: block;
+            width: 80px;
+            border-radius: 12px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 15px rgba(255,255,255,0.03) inset;
+        }
+        .kot-wrap::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 18px;
+            background: conic-gradient(from 0deg, #ff004d, #ff9900, #ffdf00, #33ff77, #0066ff, #9b30ff, #ff004d);
+            filter: blur(12px) saturate(1.05);
+            opacity: 0.9;
+            z-index: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            animation: kotHue 8s linear infinite;
+        }
+        @keyframes kotHue {
+            0% {
+                transform: rotate(0deg);
+                filter: blur(10px) hue-rotate(0deg) saturate(1);
+            }
+            50% {
+                transform: rotate(180deg);
+                filter: blur(13px) hue-rotate(180deg) saturate(1.1);
+            }
+            100% {
+                transform: rotate(360deg);
+                filter: blur(10px) hue-rotate(360deg) saturate(1);
+            }
+        }
+    </style>
+</head>
+<body style="overflow: auto;">
+    <div class="container">
+        <h1>mObywatel</h1>
+        <div class="kot-wrap">
+            <img src="assets/img/kot.png" class="kot-mini" alt="kotek">
+        </div>
+
+        <details class="instruction-details">
+            <summary>
+                INSTRUKCJA 
+                <span class="icon">▶</span>
+            </summary>
+            <div class="instruction-content">
+                <p>Aby aplikacja działała jak skrót na pulpicie telefonu (bez paska adresu przeglądarki), postępuj zgodnie z krokami.</p>
+
+                <strong style="counter-reset: step-counter;">System iOS (iPhone): 📱</strong>
+                <ol>
+                    <li>Upewnij się, że używasz przeglądarki Safari.</li>
+                    <li>Uzupełnij dane i kliknij GENERUJ.</li>
+                    <li>Na nowej stronie naciśnij ikonę Udostępnij.</li>
+                    <li>Wybierz opcję Do Ekranu głównego.</li>
+                </ol>
+
+                <strong style="counter-reset: step-counter;">System Android: 🤖</strong>
+                <ol>
+                    <li>Upewnij się, że używasz przeglądarki Chrome lub Google.</li>
+                    <li>Uzupełnij dane i kliknij GENERUJ.</li>
+                    <li>Na nowej stronie naciśnij ikonę Menu (3 kropki) w prawym górnym rogu.</li>
+                    <li>Wybierz opcję Dodaj do ekranu głównego.</li>
+                </ol>
+            </div>
+        </details>
+        <form id="dataGenerator">
+            <div class="form-group">
+                <label for="name">Imię:</label>
+                <input type="text" id="name" name="name" placeholder="Jan" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="surname">Nazwisko:</label>
+                <input type="text" id="surname" name="surname" placeholder="Kowalski" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="sex">Płeć:</label>
+                <select id="sex" name="sex" required="">
+                    <option value="MĘŻCZYZNA">MĘŻCZYZNA</option>
+                    <option value="KOBIETA">KOBIETA</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="birthday">Data Urodzenia (wybierz z kalendarza):</label>
+                <input type="date" id="birthday" name="birthday" required="">
+            </div>
+            
+            <div class="autofill-block">
+                <button type="button" id="autofillButton">Wypełnij Daty Automatycznie</button>
+                <div id="statusMessageAutofill"></div> 
+            </div>
+            <div class="autofill-all-block">
+                <button type="button" id="autofillAllButton">UZUPEŁNIJ WSZYSTKIE DANE AUTOMATYCZNIE</button>
+                <div id="statusMessageAutofillAll"></div> 
+            </div>
+
+            <div class="form-group">
+                <label for="pesel">Numer PESEL:</label>
+                <input type="text" id="pesel" name="pesel" placeholder="11-cyfrowy numer" maxlength="11" pattern="[0-9]{11}" required="">
+            </div>
+            
+            <div class="form-group">
+                <label for="mdow_series">Seria i numer mDowodu:</label>
+                <input type="text" id="mdow_series" name="mdow_series" placeholder="MWYC XXXXX" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="issue_date">Data wydania mDowodu (DD.MM.RRRR):</label>
+                <input type="text" id="issue_date" name="issue_date" placeholder="14.07.2023" maxlength="10" pattern="[0-9]{2}\.[0-9]{2}\.[0-9]{4}" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="expiry_date">Termin ważności mDowodu (DD.MM.RRRR):</label>
+                <input type="text" id="expiry_date" name="expiry_date" placeholder="14.07.2028" maxlength="10" pattern="[0-9]{2}\.[0-9]{2}\.[0-9]{4}" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="father_name">Imię ojca:</label>
+                <input type="text" id="father_name" name="father_name" placeholder="Maciej" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="mother_name">Imię matki:</label>
+                <input type="text" id="mother_name" name="mother_name" placeholder="Ewa" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="nationality">Obywatelstwo:</label>
+                <input type="text" id="nationality" name="nationality" placeholder="POLSKIE" required="">
+            </div>
+            
+            <div class="form-group">
+                <label for="birthPlace">Miejsce Urodzenia:</label>
+                <input type="text" id="birthPlace" name="birthPlace" placeholder="Warszawa" required="">
+            </div>
+
+             <div class="form-group">
+                <label for="birth_country">Kraj Urodzenia:</label>
+                <input type="text" id="birth_country" name="birth_country" placeholder="Polska" required="">
+            </div>
+            
+            <div class="form-group">
+                <label for="adress1">Adres (Ulica i numer):</label>
+                <input type="text" id="adress1" name="adress1" placeholder="Chopina 4/56" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="adress2">Kod pocztowy / nr:</label>
+                <input type="text" id="adress2" name="adress2" placeholder="42-250">
+            </div>
+
+            <div class="form-group">
+                <label for="city">Miasto:</label>
+                <input type="text" id="city" name="city" placeholder="Warszawa">
+            </div>
+
+            <div class="form-group">
+                <label for="home_date">Data zameldowania (DD.MM.RRRR):</label>
+                <input type="text" id="home_date" name="home_date" placeholder="01.01.2000" maxlength="10" pattern="[0-9]{2}\.[0-9]{2}\.[0-9]{4}" required="">
+            </div>
+            
+            <div class="form-group">
+                <label for="family_name">Nazwisko rodowe (Twoje):</label>
+                <input type="text" id="family_name" name="family_name" placeholder="Kowalski / Panieńskie">
+            </div>
+
+            <div class="form-group">
+                <label for="father_family_name">Nazwisko rodowe ojca:</label>
+                <input type="text" id="father_family_name" name="father_family_name" placeholder="Kowalski">
+            </div>
+
+            <div class="form-group">
+                <label for="mother_family_name">Nazwisko rodowe matki:</label>
+                <input type="text" id="mother_family_name" name="mother_family_name" placeholder="Nowak">
+            </div>
+            
+            <div class="divider"></div>
+
+            <div class="form-group">
+                <label for="fileInput">Zdjęcie:</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="fileInput" accept="image/jpeg, image/png" required="">
+                    
+                    <label for="fileInput" id="fileLabel" class="custom-file-upload">Wybierz plik...</label>
+
+                    <label for="fileInput" class="image-preview-container" id="imagePreviewContainer">
+                        <img id="imagePreview" src="#" alt="Podgląd zdjęcia">
+                    </label>
+
+                    <input type="hidden" id="image" name="image" value="">
+                </div>
+            </div>
+            <div id="statusMessage"></div> 
+            
+            <button type="submit" id="generateButton">/// GENERUJ ///</button>
+            
+        </form>
+    </div>
+<script>
+        localStorage.removeItem("offlinePhoto");
+
+        const form = document.getElementById('dataGenerator');
+        const fileInput = document.getElementById('fileInput');
+        const imageURLInput = document.getElementById('image');
+        const fileLabel = document.getElementById('fileLabel');
+        const generateButton = document.getElementById('generateButton');
+        const statusMessage = document.getElementById('statusMessage'); 
+        const statusMessageAutofill = document.getElementById('statusMessageAutofill'); 
+        const statusMessageAutofillAll = document.getElementById('statusMessageAutofillAll'); 
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const autofillButton = document.getElementById('autofillButton');
+        const autofillAllButton = document.getElementById('autofillAllButton'); 
+        
+        // Pola formularza
+        const peselInput = document.getElementById('pesel');
+        const issueDateInput = document.getElementById('issue_date');
+        const expiryDateInput = document.getElementById('expiry_date');
+        const homeDateInput = document.getElementById('home_date');
+        const birthdayInput = document.getElementById('birthday');
+
+        const manualDateFields = [
+            issueDateInput,
+            expiryDateInput,
+            homeDateInput,
+        ];
+
+        function adjustSurnameToFemaleIfNeeded(baseSurname, isFemale) {
+            if (!isFemale) return baseSurname;
+            const lower = baseSurname.toLowerCase();
+            if (lower.endsWith('ski')) return baseSurname.slice(0, -3) + 'ska';
+            if (lower.endsWith('cki')) return baseSurname.slice(0, -3) + 'cka';
+            if (lower.endsWith('dzki')) return baseSurname.slice(0, -3) + 'dzka';
+            if (lower.endsWith('ny')) return baseSurname.slice(0, -2) + 'na';
+            if (lower.endsWith('ły')) return baseSurname.slice(0, -2) + 'ła';
+            return baseSurname;
+        }
+
+        const maleNames = ['Jan', 'Adam', 'Piotr', 'Krzysztof', 'Andrzej', 'Tomasz', 'Michał', 'Paweł', 'Marcin', 'Stanisław', 'Jakub', 'Mateusz', 'Grzegorz', 'Łukasz', 'Maciej', 'Bartosz', 'Dawid', 'Robert', 'Rafał', 'Jacek', 'Marek', 'Wojciech', 'Szymon', 'Patryk', 'Kamil', 'Damian', 'Daniel', 'Karol', 'Filip', 'Artur', 'Sebastian', 'Adrian', 'Mikołaj', 'Hubert', 'Dominik', 'Igor', 'Kacper', 'Oskar', 'Radosław', 'Mariusz'];
+        const femaleNames = ['Anna', 'Maria', 'Katarzyna', 'Małgorzata', 'Agnieszka', 'Barbara', 'Ewa', 'Elżbieta', 'Zofia', 'Joanna', 'Aleksandra', 'Natalia', 'Magdalena', 'Monika', 'Martyna', 'Julia', 'Justyna', 'Weronika', 'Dominika', 'Sylwia', 'Paulina', 'Patrycja', 'Karolina', 'Aneta', 'Iwona', 'Dorota', 'Marzena', 'Beata', 'Renata', 'Izabela', 'Jolanta', 'Halina', 'Grażyna', 'Bożena', 'Danuta', 'Irena', 'Jadwiga', 'Wanda', 'Helena', 'Lucyna'];
+        const surnames = ['Nowak', 'Kowalski', 'Wiśniewski', 'Wójcik', 'Kowalczyk', 'Kamiński', 'Lewandowski', 'Zieliński', 'Szymański', 'Woźniak', 'Dąbrowski', 'Kozłowski', 'Jankowski', 'Mazur', 'Wojciechowski', 'Kwiatkowski', 'Krawczyk', 'Kaczmarek', 'Piotrowski', 'Grabowski', 'Nowakowski', 'Pawłowski', 'Michalski', 'Nowicki', 'Adamczyk', 'Dudek', 'Zając', 'Wieczorek', 'Jabłoński', 'Król', 'Majewski', 'Olszewski', 'Jaworski', 'Wróbel', 'Malinowski', 'Pawlak', 'Witkowski', 'Walczak', 'Stępień', 'Górski', 'Rutkowski', 'Michalak', 'Sikora', 'Ostrowski', 'Baran', 'Duda', 'Szewczyk', 'Tomaszewski', 'Pietrzak', 'Marciniak', 'Wróblewski', 'Zalewski', 'Jakubowski', 'Jasiński', 'Zawadzki', 'Sadowski', 'Bąk', 'Chmielewski', 'Włodarczyk', 'Borkowski', 'Czarnecki', 'Sawicki', 'Sokołowski', 'Urbański', 'Kubiak', 'Maciejewski', 'Szczepański', 'Kucharski', 'Wilk', 'Kalinowski', 'Lis', 'Mazurek', 'Wysocki', 'Adamski', 'Kaźmierczak', 'Wasilewski', 'Sobczak', 'Czerwiński', 'Andrzejewski', 'Cieślak', 'Głowacki', 'Zakrzewski', 'Kołodziej', 'Sikorski', 'Krajewski', 'Gajewski', 'Szymczak', 'Szulc', 'Baranowski', 'Laskowski', 'Brzeziński', 'Makowski', 'Ziółkowski', 'Przybylski', 'Domański', 'Nowacki', 'Borowski', 'Błaszczyk', 'Chojnacki', 'Ciesielski', 'Mróz', 'Szczepaniak', 'Kaczmarczyk', 'Leszczyński', 'Lipiński', 'Kowalewski'];
+        const cities = ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Lublin', 'Katowice', 'Białystok', 'Gdynia', 'Częstochowa', 'Radom', 'Sosnowiec', 'Toruń', 'Kielce', 'Rzeszów', 'Gliwice', 'Zabrze', 'Olsztyn', 'Bielsko-Biała', 'Bytom', 'Zielona Góra', 'Rybnik', 'Ruda Śląska', 'Opole', 'Tychy', 'Gorzów Wielkopolski', 'Dąbrowa Górnicza', 'Płock', 'Elbląg', 'Wałbrzych', 'Włocławek', 'Tarnów', 'Chorzów', 'Koszalin', 'Kalisz', 'Legnica', 'Grudziądz', 'Jaworzno', 'Słupsk', 'Jastrzębie-Zdrój', 'Nowy Sącz', 'Jelenia Góra', 'Konin', 'Piotrków Trybunalski', 'Siedlce', 'Lubin', 'Mysłowice', 'Piła', 'Ostrów Wielkopolski', 'Ostrowiec Świętokrzyski', 'Gniezno', 'Stargard', 'Siemianowice Śląskie', 'Suwałki', 'Głogów', 'Pabianice', 'Chełm', 'Zamość', 'Pruszków', 'Łomża', 'Żory', 'Ełk', 'Tarnowskie Góry', 'Tomaszów Mazowiecki', 'Przemyśl', 'Stalowa Wola', 'Kędzierzyn-Koźle', 'Mielec', 'Tczew', 'Będzin', 'Zgierz', 'Piekary Śląskie', 'Racibórz', 'Legionowo', 'Świdnica', 'Wejherowo', 'Wodzisław Śląski', 'Starachowice', 'Puławy', 'Skierniewice', 'Rumia', 'Otwock', 'Nysa', 'Krosno', 'Zawiercie', 'Biała Podlaska', 'Świnoujście', 'Skarżysko-Kamienna', 'Jarosław', 'Żyrardów', 'Bolesławiec', 'Nowa Ruda', 'Knurów', 'Sanok', 'Oświęcim', 'Sandomierz', 'Kętrzyn', 'Kołobrzeg', 'Olkusz', 'Zduńska Wola', 'Śrem', 'Cieszyn', 'Lębork', 'Nowy Targ', 'Włoszczowa', 'Zambrów', 'Brzozów', 'Kartuzy', 'Luboń', 'Pszczyna', 'Koło', 'Łuków', 'Gostynin', 'Sieradz', 'Rawicz', 'Wągrowec', 'Jarocin', 'Goleniów', 'Oleśnica', 'Kluczbork', 'Szczecinek', 'Środa Wielkopolska', 'Bielsk Podlaski', 'Gostyń', 'Chodzież', 'Strzegom', 'Strzelce Opolskie', 'Wieluń', 'Września', 'Nowy Dwór Mazowiecki', 'Mikołów', 'Bilgoraj', 'Żary', 'Bochnia', 'Brzesko', 'Gorlice', 'Limanowa', 'Myślenice', 'Oława', 'Bieruń', 'Krotoszyn', 'Lubliniec', 'Namysłów', 'Grodzisk Mazowiecki', 'Szamotuły', 'Brodnica', 'Kościan', 'Gryfino', 'Sulechów', 'Świebodzice', 'Węgrów', 'Ząbki', 'Łańcut', 'Orzesze', 'Polkowice', 'Trzebnica', 'Jasło', 'Nowa Sól', 'Lubartów', 'Kościerzyna', 'Słubice', 'Reda', 'Świecie', 'Jawor', 'Gryfice', 'Milanówek', 'Pleszew', 'Władysławowo', 'Kcynia', 'Szczyrk', 'Kórnik', 'Czaplinek', 'Krynica-Zdrój', 'Muszyna', 'Szczawnica', 'Kudowa-Zdrój', 'Polanica-Zdrój', 'Busko-Zdrój', 'Nałęczów', 'Ciechocinek', 'Rabka-Zdrój', 'Iwonicz-Zdrój', 'Ustka', 'Łeba', 'Międzyzdroje', 'Świnoujście', 'Władysławowo', 'Jastarnia', 'Hel', 'Krynica Morska', 'Piwniczna-Zdrój', 'Szczawno-Zdrój', 'Duszniki-Zdrój', 'Jedlina-Zdrój', 'Połczyn-Zdrój', 'Goczałkowice-Zdrój', 'Rabka-Zdrój', 'Ustroń', 'Wisła', 'Szczyrk', 'Zakopane', 'Karpacz', 'Szklarska Poręba'];
+        const streets = ['Chopina', 'Mickiewicza', 'Słowackiego', 'Kościuszki', 'Piłsudskiego', 'Krakowska', 'Główna', 'Leśna', 'Szkolna', 'Ogrodowa', 'Sienkiewicza', 'Konopnickiej', 'Reymonta', 'Wyspiańskiego', 'Asnyka', 'Kasprowicza', 'Staffa', 'Żeromskiego', 'Orzeszkowej', 'Roosevelta', 'Wałowa', 'Waryńskiego', 'Świętokrzyska', 'Marszałkowska', 'Aleje Jerozolimskie', 'Nowy Świat', 'Krzywickiego', 'Narutowicza', 'Grzybowska', 'Targowa', 'Złota', 'Jasna', 'Wspólna', 'Hoża', 'Wilcza', 'Krucza', 'Emilii Plater', 'Piękna', 'Koszykowa', 'Ludna', 'Solec', 'Czerniakowska', 'Puławska', 'Belwederska', 'Ujazdowskie', 'Kielecka', 'Rakowiecka', 'Narbutta', 'Madalińskiego', 'Niepodległości', 'Wawelska', 'Oboźna', 'Gagarina', 'Stalowa', 'Ząbkowska', 'Brzeska', 'Kawęczyńska', 'Grochowska', 'Saska', 'Francuska', 'Sobieskiego', 'Bema', 'Modlińska', 'Gdańska', 'Toruńska', 'Pomorska', 'Wrocławska', 'Legnicka', 'Świdnicka', 'Kazimierza Wielkiego', 'Podwale', 'Oławska', 'Ruska', 'Rzeźnicza', 'Katedralna', 'Szewska', 'Jagiellońska', 'Floriańska', 'Grodzka', 'Kanonicza', 'Senatorska', 'Miodowa', 'Freta', 'Długa', 'Nowowiejska', 'Kosynierów', 'Grunwaldzka', 'Hallera', 'Wita Stwosza', 'Curie-Skłodowskiej', 'Grunwaldzka', 'Wrocławska', 'Śląska', 'Opolska', 'Krakowskie Przedmieście', 'Zamkowa', 'Wały Hetmańskie', 'Kilińskiego', '3 Maja', 'Konstytucji', 'Wolności', 'Piastowska', 'Chrobrego', 'Książąt Pomorskich', 'Bohaterów Warszawy', 'Powstańców Śląskich', 'Korfantego', 'Wyszyńskiego', 'Dmowskiego', 'Narutowicza', 'Reytana', 'Batorego', 'Sobieskiego', 'Sikorskiego', 'Moniuszki', 'Wyspiańskiego', 'Kossaka', 'Matejki', 'Chełmońskiego', 'Malczewskiego', 'Wyczółkowskiego', 'Mehoffera', 'Bończyka', 'Staszica', 'Śniadeckich', 'Kopernika', 'Heweliusza', 'Ossolińskich', 'Lelewela', 'Niemcewicza', 'Krasickiego', 'Fredry', 'Zakopiańska', 'Góralska', 'Podhalańska', 'Beskidzka', 'Tatrzańska', 'Karpacka', 'Bieszczadzka', 'Sudety', 'Karkonoska', 'Mazurska', 'Warmińska', 'Kaszubska', 'Pomorska', 'Śląska', 'Wielkopolska', 'Mazowiecka', 'Małopolska', 'Lubelska', 'Podlaska', 'Kujawska', 'Łódzka', 'Świętokrzyska', 'Opolska', 'Dolnośląska', 'Zachodniopomorska', 'Pomorska', 'Warmińsko-Mazurska', 'Lubuskie', 'Podkarpacka'];
+
+        function formatDateForDisplay(date) {
+            if (!(date instanceof Date) || isNaN(date)) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+        
+        function formatDateForURL(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('-');
+            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+        
+        function generateRandomFiveDigits() {
+            return Math.floor(10000 + Math.random() * 90000);
+        }
+
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateRandomPostalCode() {
+            const part1 = Math.floor(10 + Math.random() * 90);
+            const part2 = Math.floor(100 + Math.random() * 900);
+            return `${part1}-${part2}`;
+        }
+
+        function fillAllFieldsWithRandomData() {
+            const isMale = Math.random() > 0.5;
+            const sexValue = isMale ? 'MĘŻCZYZNA' : 'KOBIETA';
+            document.getElementById('sex').value = sexValue;
+
+            const firstName = isMale ? getRandomElement(maleNames) : getRandomElement(femaleNames);
+            const lastName = getRandomElement(surnames);
+            const adjustedLastName = adjustSurnameToFemaleIfNeeded(lastName, !isMale);
+            
+            document.getElementById('name').value = firstName;
+            document.getElementById('surname').value = adjustedLastName;
+
+            const currentYear = new Date().getFullYear();
+            const birthYear = currentYear - (18 + Math.floor(Math.random() * 43));
+            const birthMonth = Math.floor(Math.random() * 12) + 1;
+            const birthDay = Math.floor(Math.random() * 28) + 1;
+            const birthDate = `${birthYear}-${String(birthMonth).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`;
+            document.getElementById('birthday').value = birthDate;
+
+            autofillDatesAndPesel(birthDate);
+
+            document.getElementById('father_name').value = getRandomElement(maleNames);
+            document.getElementById('mother_name').value = getRandomElement(femaleNames);
+
+            document.getElementById('nationality').value = 'POLSKIE';
+            document.getElementById('birth_country').value = 'Polska';
+            document.getElementById('birthPlace').value = getRandomElement(cities);
+
+            const streetNumber = Math.floor(Math.random() * 100) + 1;
+            const apartmentNumber = Math.floor(Math.random() * 200) + 1;
+            document.getElementById('adress1').value = `${getRandomElement(streets)} ${streetNumber}/${apartmentNumber}`;
+            document.getElementById('adress2').value = generateRandomPostalCode();
+            document.getElementById('city').value = getRandomElement(cities);
+
+            document.getElementById('family_name').value = adjustedLastName;
+            document.getElementById('father_family_name').value = adjustedLastName;
+            document.getElementById('mother_family_name').value = getRandomElement(surnames);
+
+            statusMessageAutofillAll.style.color = 'var(--success-green)';
+            statusMessageAutofillAll.textContent = 'Wszystkie dane zostały wypełnione losowymi wartościami! ✅';
+        }
+
+        function autofillDatesAndPesel(birthDateValue) {
+            statusMessageAutofill.style.color = 'var(--error-red)';
+            
+            if (!birthDateValue) {
+                statusMessageAutofill.textContent = 'BŁĄD: Najpierw wybierz Datę Urodzenia z kalendarza!';
+                return;
+            }
+
+            const birthDate = new Date(birthDateValue);
+            const currentYear = new Date().getFullYear();
+            const birthYear = birthDate.getFullYear();
+            const isAdult = currentYear - birthYear >= 18;
+            
+            let issueDate;
+            
+            if (isAdult) {
+                const adultDate = new Date(birthDate.getTime());
+                adultDate.setFullYear(adultDate.getFullYear() + 18); 
+                
+                issueDate = new Date(adultDate.getTime());
+                issueDate.setDate(issueDate.getDate() + 1); 
+
+                const today = new Date();
+                if (issueDate > today) {
+                    issueDate = new Date(today.getTime()); 
+                }
+                
+            } else {
+                issueDate = new Date(birthDate.getTime());
+                issueDate.setFullYear(issueDate.getFullYear() + 13);
+                issueDate.setDate(issueDate.getDate() + 1); 
+                
+                const today = new Date();
+                if (issueDate > today) {
+                    issueDate = new Date(today.getTime()); 
+                }
+            }
+
+            const expiryDate = new Date(issueDate.getTime());
+            expiryDate.setFullYear(expiryDate.getFullYear() + 5);
+
+            const homeDate = new Date(birthDate.getTime());
+            homeDate.setFullYear(homeDate.getFullYear() + 1);
+
+            const birthMonth = birthDate.getMonth() + 1;
+            const birthDay = birthDate.getDate();
+            const birthYearMod = birthYear % 100;
+            
+            let peselMonth = birthMonth;
+            if (birthYear >= 2000) {
+                peselMonth += 20;
+            }
+            
+            const sexVal = document.getElementById('sex').value;
+            const sexLower = (sexVal || "").toString().toLowerCase();
+            let later = "0295";
+            if (sexLower.indexOf('kob') !== -1) later = "0382";
+
+            let dayStr = String(birthDay);
+            let monthForPesel = peselMonth;
+            if (birthDay < 10) dayStr = "0" + dayStr;
+            let monthStr = String(monthForPesel);
+            if (monthForPesel < 10) monthStr = "0" + monthStr;
+
+            const generatedPesel = String(birthYearMod).padStart(2, '0') + monthStr + dayStr + later + "7";
+            peselInput.value = generatedPesel.substring(0, 11);
+            
+            document.getElementById('mdow_series').value = `MWYC ${generateRandomFiveDigits()}`;
+            
+            issueDateInput.value = formatDateForDisplay(issueDate);
+            expiryDateInput.value = formatDateForDisplay(expiryDate);
+            homeDateInput.value = formatDateForDisplay(homeDate);
+            
+            statusMessageAutofill.style.color = 'var(--success-green)';
+            statusMessageAutofill.textContent = 'Daty i numery zostały wygenerowane pomyślnie! ✅';
+        }
+
+        autofillButton.addEventListener('click', function() {
+            const birthDateValue = birthdayInput.value;
+            autofillDatesAndPesel(birthDateValue);
+        });
+
+        autofillAllButton.addEventListener('click', fillAllFieldsWithRandomData);
+
+        function validateDateFormat(input) {
+            const datePattern = new RegExp(input.pattern);
+            if (!input.value) return !input.required; 
+            
+            if (input.value.length !== 10 || !datePattern.test(input.value)) {
+                return false;
+            }
+            return true;
+        }
+
+        function validatePeselFormat(input) {
+            const peselPattern = new RegExp(input.pattern);
+            if (!input.value) return !input.required;
+
+            if (input.value.length !== 11 || !peselPattern.test(input.value)) {
+                return false;
+            }
+            return true;
+        }
+        let localBase64Image = "";
+
+        fileInput.addEventListener('change', function() {
+            statusMessage.textContent = ''; 
+            const file = this.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localBase64Image = e.target.result;
+                    // Zapisujemy od razu do pamięci przeglądarki
+                    localStorage.setItem("offlinePhoto", localBase64Image);
+                    
+                    imagePreview.src = localBase64Image;
+                    imagePreview.style.display = 'block';
+                    imagePreviewContainer.classList.add('active');
+                    fileLabel.style.display = 'none'; 
+                    statusMessage.style.color = 'var(--success-green)';
+                    statusMessage.textContent = 'Nowe zdjęcie załadowane! ✅';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileLabel.style.display = 'block';
+                imagePreview.style.display = 'none';
+                imagePreviewContainer.classList.remove('active');
+                localBase64Image = "";
+                statusMessage.textContent = '';
+            }
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            
+            for (const input of manualDateFields) {
+                if (!validateDateFormat(input)) {
+                    statusMessage.style.color = 'var(--error-red)';
+                    statusMessage.textContent = `BŁĄD: Pole ${input.name.toUpperCase()} musi być w formacie DD.MM.RRRR!`;
+                    input.focus();
+                    return;
+                }
+            }
+
+            if (!validatePeselFormat(peselInput)) {
+                statusMessage.style.color = 'var(--error-red)';
+                statusMessage.textContent = 'BŁĄD: Numer PESEL musi zawierać 11 cyfr!';
+                peselInput.focus();
+                return;
+            }
+
+            if (!localBase64Image) {
+                statusMessage.style.color = 'var(--error-red)';
+                statusMessage.textContent = 'Wybierz plik zdjęcia, aby kontynuować!';
+                return;
+            }
+            localStorage.setItem("offlinePhoto", localBase64Image);
+            const nameMap = {
+                family_name: "familyName",
+                father_family_name: "fathersFamilyName",
+                mother_family_name: "mothersFamilyName",
+                birth_country: "countryOfBirth"
+            };
+            const dataObj = {};
+            const allInputs = form.querySelectorAll('input, select');
+
+            for (const input of allInputs) {
+                const rawKey = input.name;
+                if (!rawKey || rawKey === 'fileInput' || rawKey === 'image') continue;
+
+                let value = input.value || "";
+
+                if (rawKey === 'birthday') {
+                    const parts = value.split('-');
+                    if(parts.length === 3) value = `${parts[2]}.${parts[1]}.${parts[0]}`; 
+                }
+
+                if (rawKey === 'sex') {
+                    const v = (value || "").toString().toLowerCase();
+                    value = (v.indexOf('kob') !== -1 || v.indexOf('k') === 0) ? 'k' : 'm';
+                }
+
+                const finalKey = nameMap[rawKey] || rawKey;
+                dataObj[finalKey] = value;
+            }
+
+                    // Dodajemy nasze zdjęcie w Base64 do obiektu z resztą danych
+                dataObj.zdjecie = localBase64Image;
+
+                // Wysyłamy gotowy pakiet na serwer PythonAnywhere
+                fetch('https://mka52.pythonanywhere.com/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataObj)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        // Serwer przyjął dane, wygenerował token i odsyła nas do logowania!
+                        window.location.href = `index.html?token=${data.token}`;
+                    } else {
+                        alert("Błąd serwera: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd połączenia z serwerem:', error);
+                    alert("Błąd komunikacji z serwerem.");
+                });
+                    })
+    
+    </script>
+</body></html>

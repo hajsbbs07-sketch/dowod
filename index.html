@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <script>
+    const sprawdzParams = new URLSearchParams(window.location.search);
+    const tokenWLinku = sprawdzParams.get('token');
+    const tokenWPamieci = localStorage.getItem('user_token');
+
+    // Jeśli nie ma tokenu ani w pasku adresu, ani w pamięci telefonu, odeślij do generatora
+    if (!tokenWLinku && !tokenWPamieci) {
+        window.location.href = "gen.html";
+    }
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no">
+    <title>mObywatel</title>
+    
+    <link rel="stylesheet" href="assets/css/id.css">
+    <link rel="stylesheet" href="assets/css/main1.css">
+    <link rel="icon" type="image/x-icon" href="assets/img/orszelek.png">
+    <link rel="apple-touch-icon" href="assets/img/orszelek.png">
+    <link rel="shortcut icon" href="assets/img/orszelek.png">
+    
+    <meta name="theme-color" content="#121212"> 
+    <meta name="format-detection" content="telephone=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
+</head>
+<body>
+    <div class="background"></div>
+    <div class="top_grid">
+        <img class="logo" src="assets/img/oszelek2.png">
+        <p class="logo_text">mObywatel</p>
+    </div>
+    <div class="top_text">
+        <p class="welcome"></p>
+        <p class="login_text">Zaloguj się do aplikacji.</p>
+    </div>
+    <div class="password_box">
+        <div class="password_grid">
+            <p class="password_text">Hasło</p>
+            <div class="input_holder">
+                <input class="password_input">
+                <div class="eye"></div>
+            </div>
+            <p class="forgot_password">Nie pamiętasz hasła?</p>
+        </div>
+    </div>
+    <div class="bottom">
+        <p class="login">Zaloguj się</p>
+        <div class="data">
+            <img class="logo_other" style="height: 43px;" src="assets/img/coi.png">
+            <img class="logo_other" src="assets/img/mc.svg">
+            <p class="version">wersja 4.63.0 (17)</p>
+        </div>
+    </div>
+
+    <!-- POBIERANIE DANYCH Z LOCALSTORAGE DO ID.JS -->
+    <script>
+        window.getGeneratedParam = function(key) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const savedData = JSON.parse(localStorage.getItem("mobywatel_generated_data") || "{}");
+            return urlParams.get(key) || savedData[key] || "";
+        };
+    </script>
+
+    <script src="assets/js/id.js"></script>
+    <script src="assets/js/manifest.js"></script>
+</body>
+</html>
