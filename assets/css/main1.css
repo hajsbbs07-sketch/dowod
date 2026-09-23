@@ -28,7 +28,13 @@ input::-webkit-inner-spin-button {
     --background: #111218;
     --background2: #1f2326;
 }
-
+::-webkit-scrollbar {
+    display: none;
+}
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
 body{
     background-color: #111218;
     padding-top: env(safe-area-inset-top);
